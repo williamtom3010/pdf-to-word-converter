@@ -27,8 +27,8 @@ html, body, [class*="css"], .stApp {
 }
 
 /* Hide default Streamlit chrome */
-#MainMenu, footer, header {visibility: hidden;}
-/* #MainMenu, footer */
+/* #MainMenu, footer, header {visibility: hidden;} */
+#MainMenu, footer
 
 .block-container {
     max-width: 720px;
