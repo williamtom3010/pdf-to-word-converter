@@ -1,0 +1,55 @@
+<!--
+  HTML fragments for the PDF to Word Converter.
+  Each named section below is loaded by app.py.
+  Placeholders in double curly braces are filled in by app.py.
+-->
+
+<!-- @section hero -->
+<div class="hero">
+    <div class="hero-icon">
+        <span class="pill pdf">PDF</span>
+        <span class="arrow">➜</span>
+        <span class="pill word">DOCX</span>
+    </div>
+    <h1>Turn any PDF into an editable Word file</h1>
+    <p>Drop in your PDF and get a Word document back, with text, tables and images kept in place.</p>
+</div>
+<!-- @end -->
+
+<!-- @section file_card -->
+<div class="file-card">
+    <div class="badge">PDF</div>
+    <div class="meta">
+        <div class="name">{{file_name}}</div>
+        <div class="size">{{file_size}}</div>
+    </div>
+</div>
+<!-- @end -->
+
+<!-- @section done_card -->
+<div class="done-card">
+    ✓ Your Word document is ready
+    <span>Download it below and open it in Word, Google Docs or LibreOffice.</span>
+</div>
+<!-- @end -->
+
+<!-- @section features -->
+<div class="features">
+    <div class="feature">
+        <div class="icon">✏️</div>
+        <div class="title">Fully editable</div>
+        <div class="desc">Text becomes real Word text, not images.</div>
+    </div>
+    <div class="feature">
+        <div class="icon">🧩</div>
+        <div class="title">Layout preserved</div>
+        <div class="desc">Tables, images and columns stay in place.</div>
+    </div>
+    <div class="feature">
+        <div class="icon">🔒</div>
+        <div class="title">Not stored</div>
+        <div class="desc">Files are processed in memory and deleted.</div>
+    </div>
+</div>
+<div class="footer-note">Scanned PDFs (images of text) won't convert to editable text without OCR.</div>
+<!-- @end -->

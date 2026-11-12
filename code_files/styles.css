@@ -1,0 +1,246 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
+
+/* Palette: deep ink blue, paper white, a single amber accent for the action.
+   Type: Fraunces (headline) + Inter (interface). */
+
+:root {
+    --ink: #f30833;
+    --ink-soft: #5b6478;
+    --paper: #f6f7fb;
+    --card: #ffffff;
+    --line: #e3e6ef;
+    --accent: #f59e0b;
+    --accent-dark: #d98200;
+    --success: #1f8a5b;
+}
+
+html, body, [class*="css"], .stApp {
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+}
+
+.stApp {
+    background:
+        radial-gradient(900px 400px at 85% -10%, #e4e9fb 0%, transparent 60%),
+        radial-gradient(700px 380px at -10% 10%, #fdf0d5 0%, transparent 55%),
+        #0f1b3d;
+}
+
+/* Hide default Streamlit chrome */
+#MainMenu, footer, header {visibility: hidden;}
+
+.block-container {
+    max-width: 720px;
+    padding-top: 3.5rem;
+    padding-bottom: 3rem;
+}
+
+/* Hero */
+.hero {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.hero-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    font-size: 2rem;
+    margin-bottom: 0.9rem;
+}
+.hero-icon .pill {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 14px rgba(20, 33, 61, 0.06);
+}
+.hero-icon .pill.pdf  { color: #c0392b; }
+.hero-icon .pill.word { color: #2b5fc0; }
+.hero-icon .arrow     { color: var(--ink-soft); font-size: 1.3rem; }
+
+.hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 2.7rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0 0 0.6rem 0;
+    padding: 0;
+}
+.hero p {
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    max-width: 460px;
+    margin: 0 auto;
+    line-height: 1.55;
+}
+
+/* Upload area */
+[data-testid="stFileUploader"] section {
+    background: #eef1fa;      /* was var(--card) */
+    border: 2px dashed #c7cde0;
+    border-radius: 18px;
+    padding: 2.2rem 1.5rem;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+[data-testid="stFileUploader"] section:hover {
+    border-color: var(--accent);
+    background: #fffaf0;
+}
+[data-testid="stFileUploader"] section button {
+    border-radius: 10px;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    font-weight: 600;
+}
+[data-testid="stFileUploader"] label {
+    display: none;
+}
+[data-testid="stFileUploaderDropzoneInstructions"] span,
+[data-testid="stFileUploaderDropzoneInstructions"] small,
+[data-testid="stFileUploader"] section small {
+    color: #000000 !important;
+}
+/* File card */
+.file-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    margin: 1.2rem 0 1rem 0;
+    box-shadow: 0 6px 20px rgba(20, 33, 61, 0.05);
+}
+.file-card .badge {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 54px;
+    border-radius: 8px;
+    background: #fdecea;
+    color: #c0392b;
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.file-card .meta {
+    min-width: 0;
+}
+.file-card .name {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.file-card .size {
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+}
+
+/* Buttons */
+.stButton > button, .stDownloadButton > button {
+    width: 100%;
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.stButton > button[kind="primary"] {
+    background: var(--ink);
+    border: none;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(20, 33, 61, 0.25);
+}
+.stButton > button[kind="primary"]:hover {
+    background: #e90404;
+    transform: translateY(-1px);
+}
+.stDownloadButton > button {
+    background: var(--accent);
+    border: none;
+    color: #2b1d00;
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+}
+.stDownloadButton > button:hover {
+    background: var(--accent-dark);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Progress bar */
+.stProgress > div > div > div > div {
+    background: var(--accent);
+    border-radius: 999px;
+}
+.stProgress > div > div > div {
+    background: var(--line);
+    border-radius: 999px;
+}
+
+/* Success panel */
+.done-card {
+    background: #effaf4;
+    border: 1px solid #bfe6d1;
+    border-radius: 16px;
+    padding: 1.1rem 1.3rem;
+    margin: 1.2rem 0 0.9rem 0;
+    color: var(--success);
+    font-weight: 600;
+}
+.done-card span {
+    display: block;
+    color: var(--ink-soft);
+    font-weight: 400;
+    font-size: 0.92rem;
+    margin-top: 0.2rem;
+}
+
+/* Feature row */
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.9rem;
+    margin-top: 2.2rem;
+}
+.feature {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1rem;
+    text-align: center;
+}
+.feature .icon { font-size: 1.4rem; }
+.feature .title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-top: 0.3rem;
+}
+.feature .desc {
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    margin-top: 0.15rem;
+    line-height: 1.4;
+}
+
+.footer-note {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    margin-top: 2rem;
+}
+
+/* Small screens */
+@media (max-width: 640px) {
+    .features { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 2.1rem; }
+}
