@@ -1,10 +1,6 @@
-
-
 import os
 import tempfile
 from dotenv import load_dotenv
-
-
 import functools
 import logging
 import time
@@ -67,7 +63,7 @@ def convert_pdf_to_docx(pdf_bytes: bytes) -> bytes:
         for path in (pdf_path, docx_path):
             if path and os.path.exists(path):
                 os.remove(path)
-                
+
 @logged
 def convert_docx_to_pdf(doc_bytes: bytes) -> bytes:
 
