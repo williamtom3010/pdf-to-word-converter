@@ -169,7 +169,3 @@ All paths below are inside `code_files/`.
 ## Contributing
 
 Contributions are welcome. Fork the repository, create a branch for your change, and open a pull request.
-
-## License
-
-Add a license of your choice (for example MIT) and describe it here.
