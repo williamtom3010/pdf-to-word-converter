@@ -1,12 +1,12 @@
 import os
 import re
-import tempfile
 from html import escape
 from pathlib import Path
 import time
 from concurrent.futures import ThreadPoolExecutor
 import streamlit as st
-from pdf2docx import Converter
+import pdf_main
+# from pdf2docx import Converter
 
 BASE_DIR = Path(__file__).parent
 
@@ -60,30 +60,7 @@ def format_size(num_bytes: int) -> str:
         size /= 1024
 
 
-def convert_pdf_to_docx(pdf_bytes: bytes) -> bytes:
-    """Convert PDF bytes to DOCX bytes using temporary files."""
-    pdf_path = None
-    docx_path = None
-    try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
-            tmp_pdf.write(pdf_bytes)
-            pdf_path = tmp_pdf.name
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp_docx:
-            docx_path = tmp_docx.name
-
-        cv = Converter(pdf_path)
-        try:
-            cv.convert(docx_path)
-        finally:
-            cv.close()
-
-        with open(docx_path, "rb") as f:
-            return f.read()
-    finally:
-        for path in (pdf_path, docx_path):
-            if path and os.path.exists(path):
-                os.remove(path)
 
 
 # ---------------------------------------------------------------------------
@@ -118,7 +95,7 @@ if uploaded_file is not None:
         progress = st.progress(0, text="Preparing your file...")
         try:
             with ThreadPoolExecutor(max_workers=1) as pool:
-                future = pool.submit(convert_pdf_to_docx, uploaded_file.getvalue())
+                future = pool.submit(pdf_main.convert_pdf_to_docx, uploaded_file.getvalue())
 
                 # Move the bar forward while the conversion runs in the background
                 pct = 5.0
