@@ -2,3 +2,5 @@ pdf2docx
 streamlit
 docx2pdf
 img2pdf
+pdf2image
+python-dotenv

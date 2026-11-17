@@ -1,12 +1,13 @@
 import os
 import re
-from html import escape
-from pathlib import Path
 import time
 from concurrent.futures import ThreadPoolExecutor
+from html import escape
+from pathlib import Path
+
 import streamlit as st
+
 import pdf_main
-# from pdf2docx import Converter
 
 BASE_DIR = Path(__file__).parent
 
@@ -14,7 +15,7 @@ BASE_DIR = Path(__file__).parent
 # Page configuration
 # ---------------------------------------------------------------------------
 st.set_page_config(
-    page_title="PDF to Word Converter",
+    page_title="File Converter",
     page_icon="📄",
     layout="centered",
 )
@@ -50,6 +51,68 @@ st.markdown(f"<style>{load_css()}</style>", unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------
+# Conversion modes: everything that differs between conversions lives here
+# ---------------------------------------------------------------------------
+def _docx_to_pdf(data: bytes) -> bytes:
+    """docx2pdf drives MS Word through COM on Windows, and COM must be
+    initialised in any non-main thread. Harmless on other platforms."""
+    try:
+        import pythoncom
+        pythoncom.CoInitialize()
+    except ImportError:
+        pass
+    return pdf_main.convert_docx_to_pdf(data)
+
+
+MODES = {
+    "PDF → Word": {
+        "upload_label": "Upload your PDF file",
+        "types": ["pdf"],
+        "func": pdf_main.convert_pdf_to_docx,
+        "out_suffix": ".docx",
+        "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "button": "Convert to Word",
+        "download": "Download Word document",
+        "working": "Converting your PDF...",
+        "hint": "Check that the PDF isn't password-protected or corrupted.",
+    },
+    "Word → PDF": {
+        "upload_label": "Upload your Word file",
+        "types": ["docx"],
+        "func": _docx_to_pdf,
+        "out_suffix": ".pdf",
+        "mime": "application/pdf",
+        "button": "Convert to PDF",
+        "download": "Download PDF",
+        "working": "Converting your document...",
+        "hint": "This conversion needs Microsoft Word installed on the server.",
+    },
+    "Image → PDF": {
+        "upload_label": "Upload your image",
+        "types": ["png", "jpg", "jpeg"],
+        "func": pdf_main.convert_img_to_pdf,
+        "out_suffix": ".pdf",
+        "mime": "application/pdf",
+        "button": "Convert to PDF",
+        "download": "Download PDF",
+        "working": "Converting your image...",
+        "hint": "Transparent PNGs can fail. Try a JPG or a PNG without transparency.",
+    },
+    "PDF → Images": {
+        "upload_label": "Upload your PDF file",
+        "types": ["pdf"],
+        "func": pdf_main.convert_pdf_to_img,
+        "out_suffix": "_pages.zip",
+        "mime": "application/zip",
+        "button": "Convert to Images",
+        "download": "Download images (ZIP)",
+        "working": "Rendering your pages...",
+        "hint": "Check that Poppler is installed and on PATH (or set POPPLER_PATH).",
+    },
+}
+
+
+# ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 def format_size(num_bytes: int) -> str:
@@ -60,7 +123,26 @@ def format_size(num_bytes: int) -> str:
         size /= 1024
 
 
+def run_with_progress(func, data: bytes, text: str) -> bytes:
+    """Run func(data) in a background thread while animating a progress bar."""
+    progress = st.progress(0, text="Preparing your file...")
+    try:
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            future = pool.submit(func, data)
 
+            pct = 5.0
+            while not future.done():
+                pct = min(pct + (90 - pct) * 0.08, 90)
+                progress.progress(int(pct), text=text)
+                time.sleep(0.2)
+
+            result = future.result()  # re-raises any error from the thread
+
+        progress.progress(100, text="Done")
+        time.sleep(0.4)
+        return result
+    finally:
+        progress.empty()
 
 
 # ---------------------------------------------------------------------------
@@ -69,13 +151,25 @@ def format_size(num_bytes: int) -> str:
 render("hero")
 
 # ---------------------------------------------------------------------------
-# Upload
+# Mode selector
+# ---------------------------------------------------------------------------
+mode_name = st.radio(
+    "Conversion type",
+    list(MODES.keys()),
+    horizontal=True,
+    label_visibility="collapsed",
+)
+mode = MODES[mode_name]
+
+# ---------------------------------------------------------------------------
+# Upload (separate uploader per mode, so switching modes clears the file)
 # ---------------------------------------------------------------------------
 uploaded_file = st.file_uploader(
-    "Upload your PDF file",
-    type=["pdf"],
+    mode["upload_label"],
+    type=mode["types"],
     accept_multiple_files=False,
     label_visibility="collapsed",
+    key=f"uploader_{mode_name}",
 )
 
 if uploaded_file is not None:
@@ -85,48 +179,32 @@ if uploaded_file is not None:
         file_size=format_size(uploaded_file.size),
     )
 
-    # Reset previous result if a different file is uploaded
-    file_key = f"{uploaded_file.name}-{uploaded_file.size}"
+    # Reset any previous result if the file or the mode changed
+    file_key = f"{mode_name}-{uploaded_file.name}-{uploaded_file.size}"
     if st.session_state.get("file_key") != file_key:
         st.session_state["file_key"] = file_key
-        st.session_state.pop("docx_data", None)
+        st.session_state.pop("result_data", None)
 
-    if st.button("Convert to Word", type="primary"):
-        progress = st.progress(0, text="Preparing your file...")
+    if st.button(mode["button"], type="primary"):
         try:
-            with ThreadPoolExecutor(max_workers=1) as pool:
-                future = pool.submit(pdf_main.convert_pdf_to_docx, uploaded_file.getvalue())
-
-                # Move the bar forward while the conversion runs in the background
-                pct = 5.0
-                while not future.done():
-                    pct = min(pct + (90 - pct) * 0.08, 90)
-                    progress.progress(int(pct), text="Converting your PDF...")
-                    time.sleep(0.2)
-
-                st.session_state["docx_data"] = future.result()
-
-            progress.progress(100, text="Done")
-            time.sleep(0.4)
-        except Exception as e:
-            st.session_state.pop("docx_data", None)
-            st.error(
-                f"Conversion failed: {e}. Check that the PDF isn't password-protected "
-                "or corrupted, then try again."
+            st.session_state["result_data"] = run_with_progress(
+                mode["func"], uploaded_file.getvalue(), mode["working"]
             )
-        finally:
-            progress.empty()
+        except Exception as e:
+            st.session_state.pop("result_data", None)
+            st.error(f"Conversion failed: {e}. {mode['hint']}")
 
-    if "docx_data" in st.session_state:
-        output_filename = os.path.splitext(uploaded_file.name)[0] + ".docx"
+    if "result_data" in st.session_state:
+        base_name = os.path.splitext(uploaded_file.name)[0]
+        output_filename = base_name + mode["out_suffix"]
 
         render("done_card")
 
         st.download_button(
-            label="Download Word document",
-            data=st.session_state["docx_data"],
+            label=mode["download"],
+            data=st.session_state["result_data"],
             file_name=output_filename,
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            mime=mode["mime"],
         )
 
 # ---------------------------------------------------------------------------

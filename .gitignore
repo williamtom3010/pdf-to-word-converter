@@ -1,2 +1,4 @@
 .env
-pdf-to-word-converter\code_files\venv
+/code_files/venv/
+/code_files/__pycache__/
+/code_files/poppler-26.09.0/
