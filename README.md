@@ -1,4 +1,4 @@
-# 📄 File Converter
+# 📄 Doc File Converter
 
 A clean web app that converts between PDF, Word and image files. Built with [Streamlit](https://streamlit.io/).
 
